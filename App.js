@@ -1,19 +1,14 @@
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import { Button, FlatList, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import GoalItem from "./components/GoalItem";
+import GoalInput from "./components/GoalInput";
 
 export default function App() {
-  // 입력창의 상태를 관리하는 변수를 React에서 사용하는 useState 훅을 활용하여 선언.
-  const [enteredGoalText, setEnteredGoalText] = useState('');
   const [todoGoals, setTodoGoals] = useState([]);
 
-  // 사용자가 내용을 입력할 때 해당 입력값을 가져오는 함수
-  const goalInputHandler = (enteredText) => {
-    setEnteredGoalText(enteredText);
-  };
-
   // 버튼을 누르면 할 일 목록을 추가하는 함수
-  const addGoalHandler = () => {
+  const addGoalHandler = (enteredGoalText) => {
     // console.log(enteredGoalText);
     // setTodoGoals([...todoGoals, enteredGoalText]);
     // useState setter 메서드의 스냅샷 방식
@@ -22,19 +17,11 @@ export default function App() {
       ...curruentTodoGoals, 
       {text: enteredGoalText, key: Math.random().toString()}
     ]);
-
-    setEnteredGoalText('');
   };
+  
   return (
     <View style={styles.appContainer}>
-      <View style={styles.inputContainer}>
-        <TextInput 
-          style={styles.textInput} 
-          placeholder="할 일을 입력하세요" 
-          onChangeText={goalInputHandler}
-        />
-        <Button title='할 일 추가하기' onPress={addGoalHandler} />
-      </View>
+      <GoalInput onAddGoal={addGoalHandler} />
       <View style={styles.goalsContainer}>
         {/* 
           ScrollView는 전체 화면이 렌더링 될 때 안의 항목들을 전부 렌더링합니다.
@@ -43,23 +30,15 @@ export default function App() {
           FlatList는 보이는 영역만 일단 렌더링을 진행하고, 나머지 항목들은
           스크롤 움직임이 발생하면 그때그때 렌더링을 진행합니다.
         */}
-        <FlatList data={todoGoals} renderItem={(itemData) => {
-          return (
-            <View style={styles.goalItem}>
-             <Text style={styles.goalText}>{itemData.item.text}</Text>
-            </View>
-          );
-        }}
-        keyExtractor={(item, index) => {
-          return item.key;
-        }}
-        
+        <FlatList
+          data={todoGoals}
+          renderItem={(itemData) => {
+            return <GoalItem text={itemData.item.text} />;
+          }}
+          keyExtractor={(item, index) => {
+            return item.key;
+          }}
         ></FlatList>
-          {todoGoals.map((goal) => {
-            <View key={goal.key} style={styles.goalItem}>
-              <Text style={styles.goalText}>{goal.text}</Text>
-            </View>
-          })}
       </View>
     </View>
   );
@@ -71,32 +50,7 @@ const styles = StyleSheet.create({
     paddingTop: 50,
     paddingHorizontal: 16,
   },
-  inputContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 24,
-    borderBottomWidth: 1,
-    borderBottomColor: '#cccccc',
-  },
-  textInput: {
-    borderWidth: 1,
-    borderColor: '#cccccc',
-    width: '70%',
-    marginRight: 8,
-    padding: 8,
-  },
   goalsContainer: {
     flex: 4,
   },
-  goalItem: {
-    margin: 8,
-    padding: 8,
-    borderRadius: 6,
-    backgroundColor: '#5e0acc',
-  },
-  goalText: {
-    color: 'white',
-  }
 });
