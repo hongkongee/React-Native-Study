@@ -1,10 +1,11 @@
-import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
-import { Button, FlatList, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Button, FlatList, StyleSheet, View } from "react-native";
 import GoalItem from "./components/GoalItem";
 import GoalInput from "./components/GoalInput";
 
 export default function App() {
+  // 모달의 렌더링 상태를 나타내는 변수
+  const [modalIsVisible, setModalIsVisible] = useState(false);
   const [todoGoals, setTodoGoals] = useState([]);
 
   // 버튼을 누르면 할 일 목록을 추가하는 함수
@@ -15,8 +16,9 @@ export default function App() {
     // 콜백 함수의 매개값은 해당 상태 변수의 최신 값이 전달됨
     setTodoGoals((currentTodoGoals) => [
       ...currentTodoGoals,
-      {text: enteredGoalText, id: Math.random().toString()}
+      { text: enteredGoalText, id: Math.random().toString() },
     ]);
+    endAddGoalHandler();
   };
 
   const deleteGoalHandler = (id) => {
@@ -24,10 +26,29 @@ export default function App() {
       return currentTodoGoals.filter((goal) => goal.id !== id);
     });
   };
-  
+
+  const startAddGoalhandler = () => {
+    setModalIsVisible(true);
+  };
+
+  const endAddGoalHandler = () => {
+    setModalIsVisible(false);
+  };
+
   return (
     <View style={styles.appContainer}>
-      <GoalInput onAddGoal={addGoalHandler} />
+      <Button
+        title='할 일 추가하려면 누르세요!'
+        color='#5e0acc'
+        onPress={startAddGoalhandler}
+      />
+      {/* modalIsVisible && 를 직접 구현할 필요 없음 */}
+      <GoalInput
+        visible={modalIsVisible}
+        onAddGoal={addGoalHandler}
+        onCancel={endAddGoalHandler}
+      />
+
       <View style={styles.goalsContainer}>
         {/* 
           ScrollView는 전체 화면이 렌더링 될 때 안의 항목들을 전부 렌더링합니다.
@@ -40,12 +61,12 @@ export default function App() {
           data={todoGoals}
           renderItem={(itemData) => {
             return (
-            <GoalItem 
-              text={itemData.item.text}
-              id={itemData.item.id}
-              onDeleteItem={deleteGoalHandler} 
-            />
-          );
+              <GoalItem
+                text={itemData.item.text}
+                id={itemData.item.id}
+                onDeleteItem={deleteGoalHandler}
+              />
+            );
           }}
           keyExtractor={(item, index) => {
             return item.id;
